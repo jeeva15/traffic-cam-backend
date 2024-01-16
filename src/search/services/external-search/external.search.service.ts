@@ -2,8 +2,9 @@ import { HttpService } from "@nestjs/axios";
 import { Injectable, Logger } from "@nestjs/common";
 import { AxiosError } from "axios";
 import { catchError, firstValueFrom } from "rxjs";
-import { TRAFFIC_IMAGE_API } from "src/common/constants";
+import { TRAFFIC_IMAGE_API, WEATHER_DATA_API } from "src/common/constants";
 import { TrafficCameraItems, TrafficCameraResponse } from "src/interfaces/traffic.camera.response/traffic.camera.response.interface";
+import { WeatherDataResponse } from "src/interfaces/weather.data.response/weather.data.response.interface";
 
 @Injectable()
 export class ExternalSearchService {
@@ -21,6 +22,21 @@ export class ExternalSearchService {
           })
         )
     );
-    return data.items;
+
+    return data.items[0].cameras;
+  }
+
+  async fetchWeatherData2Hours(date: string): Promise<WeatherDataResponse> {
+    const { data } = await firstValueFrom(
+      this.httpService
+        .get<WeatherDataResponse>(`${WEATHER_DATA_API}?data=${date}`)
+        .pipe(
+          catchError((error: AxiosError) => {
+            this.logger.error(error.response?.data);
+            throw "An error happened!";
+          })
+        )
+    );
+    return data;
   }
 }

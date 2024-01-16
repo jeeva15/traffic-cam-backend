@@ -1,5 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { TypeOrmModuleOptions } from "@nestjs/typeorm";
+import { UsersSearches } from "src/typeorm/entities/user.searches";
 
 require('dotenv').config();
 
@@ -24,7 +25,8 @@ class ConfigService {
       username: this.getValue('POSTGRES_USER'),
       password: this.getValue('POSTGRES_PASSWORD'),
       database: this.getValue('POSTGRES_DATABASE'),
-      entities: ['**/*.entity{.ts,.js}']
+      entities: [UsersSearches],
+      synchronize: true
     };
   }
 }
