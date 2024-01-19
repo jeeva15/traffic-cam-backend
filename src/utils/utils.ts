@@ -5,7 +5,7 @@ export const getCurrentDateTimeString = (): string => {
     return `${date.getFullYear()}/${date.getMonth()+1}/${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
  }
 
- export const calculateDistanceBetween2LatLong = (latitude1:number, latitude2:number, longitude1:number, longitude2: number)=>{
+ export const calculateDistanceInKM = (latitude1:number, latitude2:number, longitude1:number, longitude2: number)=>{
     // reference https://www.movable-type.co.uk/scripts/latlong.html
     const metres = 6371e3; 
     const radians1 = latitude1 * Math.PI/180; // φ, λ in radians
@@ -20,4 +20,8 @@ export const getCurrentDateTimeString = (): string => {
 
     return metres * c / 1000; // in km
 
+ }
+
+ export const decryptData =(data: string):string => {
+   return atob(data);
  }

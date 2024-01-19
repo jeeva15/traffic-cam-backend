@@ -5,7 +5,7 @@ import { UsersSearches } from "src/typeorm/entities/user.searches";
 require('dotenv').config();
 
 @Injectable()
-class ConfigService {
+export class ConfigService {
   constructor(private env: { [k: string]: string | undefined }) {}
 
   private getValue(key: string): string {

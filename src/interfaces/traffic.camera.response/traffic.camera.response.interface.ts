@@ -1,13 +1,13 @@
 import { Timestamp } from "typeorm";
 
-export interface TrafficCameraResponse {
+export interface TrafficImagesResponse {
   items: [{
     timestamp: Timestamp;
-    cameras: TrafficCameraItems[]
+    cameras: TrafficImagesItems[]
   }]
 }
 
-export interface TrafficCameraItems {
+export interface TrafficImagesItems {
   timestamp: Timestamp;
   image: String;
   location: {

@@ -1,31 +1,33 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { ExternalSearchService } from "../external-search/external.search.service";
-import { TrafficCameraItems } from "src/interfaces/traffic.camera.response/traffic.camera.response.interface";
+import { TrafficImagesItems } from "src/interfaces/traffic.camera.response/traffic.camera.response.interface";
 import { SearchResponse } from "src/interfaces/search.response/search.response.interface";
 import {
-  calculateDistanceBetween2LatLong,
-  getCurrentDateTimeString,
+  calculateDistanceInKM
 } from "src/utils/utils";
 import {
   AreaMetaData,
-  Forecasts,
+  Forecasts
 } from "src/interfaces/weather.data.response/weather.data.response.interface";
 import { DISTANCE_THRESHOLD_TO_GET_AREA_IN_KM } from "src/common/constants";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UsersSearches } from "src/typeorm/entities/user.searches";
-import { Repository } from "typeorm";
+import { FindManyOptions, QueryFailedError, Repository } from "typeorm";
+import { AutheService } from "src/global-service/auth-service/auth.service";
 
 @Injectable()
 export class SearchService {
   constructor(
     @InjectRepository(UsersSearches)
     private usersSearchesRepository: Repository<UsersSearches>,
-    private readonly externalSearchService: ExternalSearchService,
+    private readonly externalSearchService: ExternalSearchService
   ) {}
 
-  async findAllCamerasImagesByDateTime(dateTime:string, userId: string): Promise<SearchResponse[]> {
-    const data: TrafficCameraItems[] =
-      await this.externalSearchService.findCamerasByDateTime(dateTime);
+  async findAllTrafficImagesByDateTime(
+    dateTime: string
+  ): Promise<SearchResponse[]> {
+    const data: TrafficImagesItems[] =
+      await this.externalSearchService.findTrafficImagesByDateTime(dateTime);
     const weatherData =
       await this.externalSearchService.fetchWeatherData2Hours(dateTime);
 
@@ -41,20 +43,23 @@ export class SearchService {
       response.push({
         location,
         image: cameraDetails.image as string,
-        weather: this.mapTrafficCameraWithWeatherData(
-          weatherData.items[0].forecasts,
-          location
-        ),
       });
     });
 
-    this.saveSearch(dateTime, userId)
+    await this.saveSearch(dateTime);
 
     return response;
   }
 
-  async findWeatherData(dateTime: string): Promise<any> {
-    return await this.externalSearchService.fetchWeatherData2Hours(dateTime);
+  async findWeatherData(dateTime: string, location: string): Promise<string> {
+    const weatherData =
+      await this.externalSearchService.fetchWeatherData2Hours(dateTime);
+
+    this.saveSearch(dateTime, location);
+    return this.getWeatherDataForLocation(
+      weatherData.items[0].forecasts,
+      location
+    );
   }
 
   private mapTrafficCameraWithLocation(
@@ -66,7 +71,7 @@ export class SearchService {
 
     areaMetaData.forEach((areaData: AreaMetaData) => {
       const { latitude, longitude } = areaData.label_location;
-      const distance = calculateDistanceBetween2LatLong(
+      const distance = calculateDistanceInKM(
         latitudeFromCamera,
         latitude,
         longitudeFromCamera,
@@ -81,7 +86,7 @@ export class SearchService {
     return areaName;
   }
 
-  private mapTrafficCameraWithWeatherData(
+  private getWeatherDataForLocation(
     forecastData: Forecasts[],
     location: string
   ): string {
@@ -95,16 +100,16 @@ export class SearchService {
     return forcastText;
   }
 
-  private saveSearch(dateString:string, userId:string): void {
-    if (!userId) {
-      throw new NotFoundException('User not found');
-    }
-    
+  private async saveSearch(
+    dateString: string,
+    location?: string
+  ): Promise<void> {
     const newSearch = this.usersSearchesRepository.create({
-      searchDateTime: new Date(Date.parse(atob(dateString))),
-      userId
+      searchDateTime: new Date(Date.parse(dateString)),
+      userId: AutheService.sessionId,
+      location,
     });
 
-    this.usersSearchesRepository.save(newSearch);
+    await this.usersSearchesRepository.save(newSearch);
   }
 }

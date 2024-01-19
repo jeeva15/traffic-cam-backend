@@ -11,6 +11,9 @@ export class UsersSearches {
   @Column({ type: "timestamptz", default: () => "CURRENT_TIMESTAMP" })
   createdDate: Date;
 
-  @Column()
+  @Column({ length: 255 })
   userId: String;
+
+  @Column({ length: 255, nullable: true })
+  location: String;
 }
