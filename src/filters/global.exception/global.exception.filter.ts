@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Logger,
   NotFoundException,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from "@nestjs/common";
 import { TYPEORM_ERROR_COMMON_MESSAGE } from "src/common/constants";
@@ -60,6 +61,10 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         break;
       case CannotCreateEntityIdMapError:
         status = HttpStatus.UNPROCESSABLE_ENTITY;
+        message = TYPEORM_ERROR_COMMON_MESSAGE;
+        break;
+        case ServiceUnavailableException:
+        status = HttpStatus.SERVICE_UNAVAILABLE;
         message = TYPEORM_ERROR_COMMON_MESSAGE;
         break;
     }

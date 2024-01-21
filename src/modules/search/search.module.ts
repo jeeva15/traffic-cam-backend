@@ -5,9 +5,10 @@ import { ExternalSearchService } from "./services/external-search/external.searc
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { UsersSearches } from "../../typeorm/entities/user.searches";
 import { HttpModule } from "@nestjs/axios";
+import { CacheModule } from "@nestjs/cache-manager";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UsersSearches]), HttpModule],
+  imports: [TypeOrmModule.forFeature([UsersSearches]), HttpModule, CacheModule.register()],
   controllers: [SearchController],
   providers: [SearchService, ExternalSearchService],
 })

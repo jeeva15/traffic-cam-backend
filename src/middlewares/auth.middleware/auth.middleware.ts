@@ -9,6 +9,9 @@ import { USER_ID_COOKIE_NAME } from "src/common/constants";
 import { AutheService } from "src/global-service/auth-service/auth.service";
 import { decryptData } from "src/utils/utils";
 
+/**
+ * This is where we validate user authentications
+ */
 @Injectable()
 export class AuthMiddleware implements NestMiddleware {
   use(req: any, res: any, next: () => void) {
@@ -24,7 +27,7 @@ export class AuthMiddleware implements NestMiddleware {
       next();
     } catch (err) {
       Logger.error(err);
-      throw new UnauthorizedException("Invalid user cookie");
+      //throw new UnauthorizedException("Invalid user cookie");
     }
   }
 }

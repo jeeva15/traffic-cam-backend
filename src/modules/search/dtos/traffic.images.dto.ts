@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsEmpty } from "class-validator";
+import { IsNotEmpty, IsEmpty, IsBase64 } from "class-validator";
 
 export class TrafficImagesRequest {
   @IsNotEmpty() 

@@ -11,17 +11,23 @@ export class UserService {
     private usersSearchesRepository: Repository<UsersSearches>
   ) {}
 
-  async getUsersRecentSearch(): Promise<UsersSearches[]> {
-    console.log("userid=", AutheService.sessionId)
+  async getUsersRecentSearchByUser(): Promise<UsersSearches[]> {
     return await this.usersSearchesRepository
-      .find({
-        where: { userId: AutheService.sessionId },
-        order: {
-          createdDate: "DESC",
-        },
-      })
-      .then((searches) => {
-        return searches.slice(0, 3); // only last 3 records
-      });
+      .createQueryBuilder()
+      .select("search_date_time, location")
+      .where("user_id=:id", { id: AutheService.sessionId })
+      .orderBy("created_date", "DESC")
+      .limit(2)
+      .getRawMany();
+  }
+
+  async getUsersRecentSearchByOthers(): Promise<UsersSearches[]> {
+    return await this.usersSearchesRepository
+      .createQueryBuilder()
+      .select("search_date_time, location")
+      .where("user_id<>:id", { id: AutheService.sessionId })
+      .orderBy("created_date", "DESC")
+      .limit(2)
+      .getRawMany();
   }
 }

@@ -2,17 +2,15 @@ import { Injectable } from "@nestjs/common";
 import { ExternalSearchService } from "../external-search/external.search.service";
 import { TrafficImagesItems } from "src/interfaces/traffic.camera.response/traffic.camera.response.interface";
 import { SearchResponse } from "src/interfaces/search.response/search.response.interface";
-import {
-  calculateDistanceInKM
-} from "src/utils/utils";
+import { calculateDistanceInKM } from "src/utils/utils";
 import {
   AreaMetaData,
-  Forecasts
+  Forecasts,
 } from "src/interfaces/weather.data.response/weather.data.response.interface";
 import { DISTANCE_THRESHOLD_TO_GET_AREA_IN_KM } from "src/common/constants";
 import { InjectRepository } from "@nestjs/typeorm";
 import { UsersSearches } from "src/typeorm/entities/user.searches";
-import { FindManyOptions, QueryFailedError, Repository } from "typeorm";
+import { Repository } from "typeorm";
 import { AutheService } from "src/global-service/auth-service/auth.service";
 
 @Injectable()
@@ -35,15 +33,18 @@ export class SearchService {
     data.forEach(async (cameraDetails) => {
       const { latitude, longitude } = cameraDetails.location;
 
-      const location = this.mapTrafficCameraWithLocation(
+      const location = this.findNearByLocationForTrafficCamera(
         weatherData.area_metadata,
         latitude as number,
         longitude as number
       );
-      response.push({
-        location,
-        image: cameraDetails.image as string,
-      });
+      
+        response.push({
+          weatherLocation: location,
+          location: `${cameraDetails.camera_id} - ${location}`,
+          image: cameraDetails.image as string,
+        });
+      
     });
 
     await this.saveSearch(dateTime);
@@ -51,24 +52,29 @@ export class SearchService {
     return response;
   }
 
-  async findWeatherData(dateTime: string, location: string): Promise<string> {
+  async findWeatherDataForLocation(
+    dateTime: string,
+    location: string
+  ): Promise<string> {
     const weatherData =
       await this.externalSearchService.fetchWeatherData2Hours(dateTime);
 
     this.saveSearch(dateTime, location);
+
     return this.getWeatherDataForLocation(
       weatherData.items[0].forecasts,
       location
     );
   }
 
-  private mapTrafficCameraWithLocation(
+  private findNearByLocationForTrafficCamera(
     areaMetaData: AreaMetaData[],
     latitudeFromCamera: number,
     longitudeFromCamera: number
   ): string {
     let areaName = "";
 
+    const distanceArr: { distance: number; areaName: string }[] = [];
     areaMetaData.forEach((areaData: AreaMetaData) => {
       const { latitude, longitude } = areaData.label_location;
       const distance = calculateDistanceInKM(
@@ -77,13 +83,18 @@ export class SearchService {
         longitudeFromCamera,
         longitude
       );
+
       if (distance <= DISTANCE_THRESHOLD_TO_GET_AREA_IN_KM) {
         areaName = areaData.name;
-        return;
+        distanceArr.push({ distance, areaName: areaData.name });
       }
     });
 
-    return areaName;
+    // sort by distance
+    distanceArr.sort((a: any, b: any) => a.distance - b.distance);
+
+    // find nearest area to the camera and return
+    return distanceArr[0]?.areaName ? distanceArr[0].areaName : "";
   }
 
   private getWeatherDataForLocation(
@@ -105,11 +116,11 @@ export class SearchService {
     location?: string
   ): Promise<void> {
     const newSearch = this.usersSearchesRepository.create({
-      searchDateTime: new Date(Date.parse(dateString)),
-      userId: AutheService.sessionId,
+      search_date_time: new Date(Date.parse(dateString)),
+      user_id: AutheService.sessionId,
       location,
     });
 
-    await this.usersSearchesRepository.save(newSearch);
+    await this.usersSearchesRepository.insert(newSearch);
   }
 }

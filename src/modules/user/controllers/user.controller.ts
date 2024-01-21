@@ -8,8 +8,13 @@ import { UsersSearches } from "src/typeorm/entities/user.searches";
 export class ControllersController {
   constructor(private readonly userServices: UserService) {}
 
+  @Get("user-recent-search")
+  async getRecentSearchByUser(): Promise<UsersSearches[]> {
+    return await this.userServices.getUsersRecentSearchByUser();
+  }
+
   @Get("recent-search")
   async getRecentSearch(): Promise<UsersSearches[]> {
-    return await this.userServices.getUsersRecentSearch();
+    return await this.userServices.getUsersRecentSearchByOthers();
   }
 }
