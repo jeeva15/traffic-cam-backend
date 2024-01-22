@@ -97,7 +97,7 @@ describe("SearchService", () => {
         await service.findAllTrafficImagesByDateTime("2024/20/22");
 
       expect(response).toMatchObject([
-        { image: "image.jpg", location: "22 - ", weatherLocation: "" },
+        { image: "image.jpg", location: "", cameraId: "22" },
       ]);
     });
   });
@@ -156,7 +156,7 @@ describe("SearchService", () => {
         await service.findAllTrafficImagesByDateTime("2024/20/22");
 
       expect(response).toMatchObject([
-        { image: "image.jpg", location: "22 - ", weatherLocation: "" },
+        { image: "image.jpg", location: "", cameraId: "22" },
       ]);
     });
   });

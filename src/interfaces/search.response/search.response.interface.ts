@@ -3,5 +3,5 @@ export class SearchResponse {
     image?: string;
     weather?: string;
     id?: number
-    weatherLocation?: string
+    cameraId?: string
 }

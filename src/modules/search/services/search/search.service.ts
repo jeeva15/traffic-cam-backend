@@ -40,8 +40,8 @@ export class SearchService {
       );
       
         response.push({
-          weatherLocation: location,
-          location: `${cameraDetails.camera_id} - ${location}`,
+          location: location,
+          cameraId : cameraDetails.camera_id as string,
           image: cameraDetails.image as string,
         });
       
