@@ -101,4 +101,63 @@ describe("SearchService", () => {
       ]);
     });
   });
+
+  describe("findAllTrafficImagesByDateTime()", () => {
+    it("should return data successfully", async () => {
+      const newEntity: UsersSearches = {
+        created_date: new Date(),
+        location: "loc",
+        id: 1,
+        search_date_time: new Date(),
+        user_id: "user_id",
+      };
+      entityRepositoryMock.insert.mockResolvedValue(newEntity as never);
+      const mockTrafficCameraData = [
+        {
+          timestamp: Date.now(),
+          location: {
+            latitude: 1234.3,
+            longitude: 13223.2,
+          },
+          image: "image.jpg",
+          camera_id: "22",
+        },
+      ];
+
+      const mockWeatherMetaData: any = {
+        area_metadata: [
+          {
+            name: "name",
+            label_location: {
+              longitude: 111,
+              latitude: 222,
+            },
+          },
+        ],
+        items: [
+          {
+            forecasts: [
+              {
+                area: "string",
+                forecast: "cloudy",
+              },
+            ],
+          },
+        ],
+      };
+      dependencyServiceMock.findTrafficImagesByDateTime.mockResolvedValue(
+        Promise.resolve(mockTrafficCameraData)
+      );
+      dependencyServiceMock.fetchWeatherData2Hours.mockResolvedValue(
+        Promise.resolve(mockWeatherMetaData)
+      );
+
+      const response =
+        await service.findAllTrafficImagesByDateTime("2024/20/22");
+
+      expect(response).toMatchObject([
+        { image: "image.jpg", location: "22 - ", weatherLocation: "" },
+      ]);
+    });
+  });
 });
