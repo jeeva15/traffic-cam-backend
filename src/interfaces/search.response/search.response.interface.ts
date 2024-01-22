@@ -1,7 +1,7 @@
-export interface SearchResponse {
-    location?: string,
-    image?: string
-    weather?: string
+export class SearchResponse {
+    location?: string;
+    image?: string;
+    weather?: string;
     id?: number
     weatherLocation?: string
 }

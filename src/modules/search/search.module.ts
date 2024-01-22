@@ -8,7 +8,10 @@ import { HttpModule } from "@nestjs/axios";
 import { CacheModule } from "@nestjs/cache-manager";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([UsersSearches]), HttpModule, CacheModule.register()],
+  imports: [TypeOrmModule.forFeature([UsersSearches]), HttpModule, CacheModule.register({
+    ttl: 60 * 60, // 1hr
+    max: 10, // maximum number of items in cache
+  })],
   controllers: [SearchController],
   providers: [SearchService, ExternalSearchService],
 })
