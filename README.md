@@ -43,3 +43,19 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+## API Document(Swagger)
+
+  API document can be found in the following url
+  `http://localhost:3001/api-doc`
+
+```bash
+# unit tests
+$ npm run test
+
+# e2e tests
+$ npm run test:e2e
+
+# test coverage
+$ npm run test:cov
+```
+
